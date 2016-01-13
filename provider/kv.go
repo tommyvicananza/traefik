@@ -50,7 +50,7 @@ func (provider *Kv) provide(configurationChan chan<- types.ConfigMessage) error 
 				configuration := provider.loadConfig()
 				if configuration != nil {
 					configurationChan <- types.ConfigMessage{
-						ProviderName:  string(provider.storeType),
+						ProviderName:  string(provider.StoreType),
 						Configuration: configuration,
 					}
 				}
@@ -60,7 +60,7 @@ func (provider *Kv) provide(configurationChan chan<- types.ConfigMessage) error 
 	}
 	configuration := provider.loadConfig()
 	configurationChan <- types.ConfigMessage{
-		ProviderName:  string(provider.storeType),
+		ProviderName:  string(provider.StoreType),
 		Configuration: configuration,
 	}
 	return nil
