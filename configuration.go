@@ -15,12 +15,12 @@ import (
 // GlobalConfiguration holds global configuration (with providers, etc.).
 // It's populated from the traefik configuration file passed as an argument to the binary.
 type GlobalConfiguration struct {
-	Port                      string
 	GraceTimeOut              int64
 	AccessLogsFile            string
 	TraefikLogsFile           string
-	Certificates              Certificates
 	LogLevel                  string
+	Endpoints                 map[string]*Endpoint
+	DefaultEndpoints          []string
 	ProvidersThrottleDuration time.Duration
 	Docker                    *provider.Docker
 	File                      *provider.File
@@ -30,6 +30,16 @@ type GlobalConfiguration struct {
 	Etcd                      *provider.Etcd
 	Zookeeper                 *provider.Zookepper
 	Boltdb                    *provider.BoltDb
+}
+
+type Endpoint struct {
+	Network string
+	Address string
+	TLS     *TLS
+}
+
+type TLS struct {
+	Certificates Certificates
 }
 
 // Certificates defines traefik certificates type
@@ -74,7 +84,6 @@ type Certificate struct {
 func NewGlobalConfiguration() *GlobalConfiguration {
 	globalConfiguration := new(GlobalConfiguration)
 	// default values
-	globalConfiguration.Port = ":80"
 	globalConfiguration.GraceTimeOut = 10
 	globalConfiguration.LogLevel = "ERROR"
 	globalConfiguration.ProvidersThrottleDuration = time.Duration(2 * time.Second)
@@ -100,9 +109,9 @@ func LoadConfiguration() *GlobalConfiguration {
 	if err != nil {                       // Handle errors reading the config file
 		fmtlog.Fatalf("Error reading file: %s", err)
 	}
-	if len(arguments.Certificates) > 0 {
-		viper.Set("certificates", arguments.Certificates)
-	}
+	//	if len(arguments.Certificates) > 0 {
+	//		viper.Set("certificates", arguments.Certificates)
+	//	}
 	if arguments.web {
 		viper.Set("web", arguments.Web)
 	}

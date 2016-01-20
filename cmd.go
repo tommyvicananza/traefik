@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"encoding/json"
 	log "github.com/Sirupsen/logrus"
 	"github.com/emilevauge/traefik/middlewares"
 	"github.com/emilevauge/traefik/provider"
@@ -77,7 +78,7 @@ func init() {
 	traefikCmd.PersistentFlags().StringP("graceTimeOut", "g", "10", "Timeout in seconds. Duration to give active requests a chance to finish during hot-reloads")
 	traefikCmd.PersistentFlags().String("accessLogsFile", "log/access.log", "Access logs file")
 	traefikCmd.PersistentFlags().String("traefikLogsFile", "log/traefik.log", "Traefik logs file")
-	traefikCmd.PersistentFlags().Var(&arguments.Certificates, "certificates", "SSL certificates and keys. You may add several certificate/key pairs to terminate HTTPS for multiple domain names using TLS SNI")
+	//	traefikCmd.PersistentFlags().Var(&arguments.Certificates, "certificates", "SSL certificates and keys. You may add several certificate/key pairs to terminate HTTPS for multiple domain names using TLS SNI")
 	traefikCmd.PersistentFlags().StringP("logLevel", "l", "ERROR", "Log level")
 	throttle, _ := time.ParseDuration("2s")
 	traefikCmd.PersistentFlags().DurationVar(&arguments.ProvidersThrottleDuration, "providersThrottleDuration", throttle, "Backends throttle duration: minimum duration between 2 events from providers before applying a new configuration. It avoids unnecessary reloads if multiples events are sent in a short amount of time.")
@@ -172,7 +173,8 @@ func run() {
 	} else {
 		log.SetFormatter(&log.TextFormatter{FullTimestamp: true, DisableSorting: true})
 	}
-	log.Debugf("Global configuration loaded %+v", globalConfiguration)
+	jsonConf, _ := json.Marshal(globalConfiguration)
+	log.Debugf("Global configuration loaded %s", string(jsonConf))
 	server := NewServer(*globalConfiguration)
 	server.Start()
 	server.Close()
