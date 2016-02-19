@@ -221,11 +221,17 @@ func LoadConfiguration() *GlobalConfiguration {
 	if arguments.marathon {
 		viper.Set("marathon", arguments.Marathon)
 	}
+	if !arguments.consulTLS {
+		arguments.Consul.TLS = nil
+	}
 	if arguments.consul {
 		viper.Set("consul", arguments.Consul)
 	}
 	if arguments.zookeeper {
 		viper.Set("zookeeper", arguments.Zookeeper)
+	}
+	if !arguments.etcdTLS {
+		arguments.Etcd.TLS = nil
 	}
 	if arguments.etcd {
 		viper.Set("etcd", arguments.Etcd)

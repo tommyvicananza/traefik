@@ -8,7 +8,16 @@ import (
 
 // Consul holds configurations of the Consul provider.
 type Consul struct {
-	Kv `mapstructure:",squash"`
+	Kv  `mapstructure:",squash"`
+	TLS *ConsulTLS
+}
+
+// ConsulTLS holds TLS specific configurations
+type ConsulTLS struct {
+	CA                 string
+	Cert               string
+	Key                string
+	InsecureSkipVerify bool
 }
 
 // Provide allows the provider to provide configurations to traefik
