@@ -22,18 +22,18 @@ type Kv struct {
 	BaseProvider `mapstructure:",squash"`
 	Endpoint     string
 	Prefix       string
-	// TLS          *KvTLS
-	storeType store.Backend
-	kvclient  store.Store
+	TLS          *KvTLS
+	storeType    store.Backend
+	kvclient     store.Store
 }
 
 // KvTLS holds TLS specific configurations
-// type KvTLS struct {
-// 	CA                 string
-// 	Cert               string
-// 	Key                string
-// 	InsecureSkipVerify bool
-// }
+type KvTLS struct {
+	CA                 string
+	Cert               string
+	Key                string
+	InsecureSkipVerify bool
+}
 
 func (provider *Kv) provide(configurationChan chan<- types.ConfigMessage) error {
 	storeConfig := &store.Config{
@@ -41,7 +41,7 @@ func (provider *Kv) provide(configurationChan chan<- types.ConfigMessage) error 
 		Bucket:            "traefik",
 	}
 
-	fmt.Println(provider)
+	fmt.Printf("2: %q\n", provider.TLS)
 
 	// if provider.TLS != nil {
 	// 	caPool := x509.NewCertPool()

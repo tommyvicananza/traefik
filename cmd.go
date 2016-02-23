@@ -60,11 +60,11 @@ var arguments = struct {
 		Web:      &WebProvider{},
 		Marathon: &provider.Marathon{},
 		Consul: &provider.Consul{
-			TLS: &provider.ConsulTLS{},
+			TLS: &provider.KvTLS{},
 		},
 		Zookeeper: &provider.Zookepper{},
 		Etcd: &provider.Etcd{
-			TLS: &provider.EtcdTLS{},
+			TLS: &provider.KvTLS{},
 		},
 		Boltdb: &provider.BoltDb{},
 	},
