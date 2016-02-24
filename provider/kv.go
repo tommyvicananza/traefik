@@ -2,6 +2,10 @@
 package provider
 
 import (
+	//"crypto/tls"
+	//"crypto/x509"
+	"fmt"
+	//"io/ioutil"
 	"strings"
 	"text/template"
 	"time"
@@ -18,18 +22,57 @@ type Kv struct {
 	BaseProvider `mapstructure:",squash"`
 	Endpoint     string
 	Prefix       string
+	TLS          *KvTLS
 	storeType    store.Backend
 	kvclient     store.Store
 }
 
+// KvTLS holds TLS specific configurations
+type KvTLS struct {
+	CA                 string
+	Cert               string
+	Key                string
+	InsecureSkipVerify bool
+}
+
 func (provider *Kv) provide(configurationChan chan<- types.ConfigMessage) error {
+	storeConfig := &store.Config{
+		ConnectionTimeout: 30 * time.Second,
+		Bucket:            "traefik",
+	}
+
+	fmt.Printf("2: %q\n", provider.TLS)
+
+	// if provider.TLS != nil {
+	// 	caPool := x509.NewCertPool()
+
+	// 	if provider.TLS.CA != "" {
+	// 		ca, err := ioutil.ReadFile(provider.TLS.CA)
+
+	// 		if err != nil {
+	// 			log.Fatal(err)
+	// 		}
+
+	// 		caPool.AppendCertsFromPEM(ca)
+	// 	}
+
+	// 	cert, err := tls.LoadX509KeyPair(provider.TLS.Cert, provider.TLS.Key)
+
+	// 	if err != nil {
+	// 		log.Fatal(err)
+	// 	}
+
+	// 	storeConfig.TLS = &tls.Config{
+	// 		Certificates:       []tls.Certificate{cert},
+	// 		RootCAs:            caPool,
+	// 		InsecureSkipVerify: provider.TLS.InsecureSkipVerify,
+	// 	}
+	// }
+
 	kv, err := libkv.NewStore(
 		provider.storeType,
 		[]string{provider.Endpoint},
-		&store.Config{
-			ConnectionTimeout: 30 * time.Second,
-			Bucket:            "traefik",
-		},
+		storeConfig,
 	)
 	if err != nil {
 		return err
