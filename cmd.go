@@ -39,18 +39,18 @@ var versionCmd = &cobra.Command{
 
 var arguments = struct {
 	GlobalConfiguration
-	web       bool
-	file      bool
-	docker    bool
-	dockerTLS bool
-	marathon  bool
-	consul    bool
+	web           bool
+	file          bool
+	docker        bool
+	dockerTLS     bool
+	marathon      bool
+	consul        bool
 	consulCatalog bool
-	consulTLS bool
-	zookeeper bool
-	etcd      bool
-	etcdTLS   bool
-	boltdb    bool
+	consulTLS     bool
+	zookeeper     bool
+	etcd          bool
+	etcdTLS       bool
+	boltdb        bool
 }{
 	GlobalConfiguration{
 		EntryPoints: make(EntryPoints),
@@ -61,12 +61,16 @@ var arguments = struct {
 		Web:      &WebProvider{},
 		Marathon: &provider.Marathon{},
 		Consul: &provider.Consul{
-			TLS: &provider.KvTLS{},
+			Kv: provider.Kv{
+				TLS:&provider.KvTLS{},
+			},
 		},
 		ConsulCatalog: &provider.ConsulCatalog{},
 		Zookeeper: &provider.Zookepper{},
 		Etcd: &provider.Etcd{
-			TLS: &provider.KvTLS{},
+			Kv: provider.Kv{
+				TLS:&provider.KvTLS{},
+			},
 		},
 		Boltdb: &provider.BoltDb{},
 	},
@@ -93,7 +97,7 @@ func init() {
 	traefikCmd.PersistentFlags().Var(&arguments.EntryPoints, "entryPoints", "Entrypoints definition using format: --entryPoints='Name:http Address::8000 Redirect.EntryPoint:https' --entryPoints='Name:https Address::4442 TLS:tests/traefik.crt,tests/traefik.key'")
 	traefikCmd.PersistentFlags().Var(&arguments.DefaultEntryPoints, "defaultEntryPoints", "Entrypoints to be used by frontends that do not specify any entrypoint")
 	traefikCmd.PersistentFlags().StringP("logLevel", "l", "ERROR", "Log level")
-	traefikCmd.PersistentFlags().DurationVar(&arguments.ProvidersThrottleDuration, "providersThrottleDuration", time.Duration(2*time.Second), "Backends throttle duration: minimum duration between 2 events from providers before applying a new configuration. It avoids unnecessary reloads if multiples events are sent in a short amount of time.")
+	traefikCmd.PersistentFlags().DurationVar(&arguments.ProvidersThrottleDuration, "providersThrottleDuration", time.Duration(2 * time.Second), "Backends throttle duration: minimum duration between 2 events from providers before applying a new configuration. It avoids unnecessary reloads if multiples events are sent in a short amount of time.")
 	traefikCmd.PersistentFlags().Int("maxIdleConnsPerHost", 0, "If non-zero, controls the maximum idle (keep-alive) to keep per-host.  If zero, DefaultMaxIdleConnsPerHost is used")
 
 	traefikCmd.PersistentFlags().BoolVar(&arguments.web, "web", false, "Enable Web backend")
@@ -169,7 +173,7 @@ func init() {
 	// TODO: wait for this issue to be corrected: https://github.com/spf13/viper/issues/105
 	viper.BindPFlag("providersThrottleDuration", traefikCmd.PersistentFlags().Lookup("providersThrottleDuration"))
 	viper.BindPFlag("maxIdleConnsPerHost", traefikCmd.PersistentFlags().Lookup("maxIdleConnsPerHost"))
-	viper.SetDefault("providersThrottleDuration", time.Duration(2*time.Second))
+	viper.SetDefault("providersThrottleDuration", time.Duration(2 * time.Second))
 	viper.SetDefault("logLevel", "ERROR")
 }
 
@@ -191,7 +195,7 @@ func run() {
 	log.SetLevel(level)
 
 	if len(globalConfiguration.TraefikLogsFile) > 0 {
-		fi, err := os.OpenFile(globalConfiguration.TraefikLogsFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+		fi, err := os.OpenFile(globalConfiguration.TraefikLogsFile, os.O_RDWR | os.O_CREATE | os.O_APPEND, 0666)
 		defer fi.Close()
 		if err != nil {
 			log.Fatal("Error opening file", err)

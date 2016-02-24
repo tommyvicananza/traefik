@@ -11,7 +11,6 @@ import (
 // Etcd holds configurations of the Etcd provider.
 type Etcd struct {
 	Kv  `mapstructure:",squash"`
-	TLS *KvTLS
 }
 
 // Provide allows the provider to provide configurations to traefik

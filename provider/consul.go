@@ -11,7 +11,6 @@ import (
 // Consul holds configurations of the Consul provider.
 type Consul struct {
 	Kv  `mapstructure:",squash"`
-	TLS *KvTLS
 }
 
 // Provide allows the provider to provide configurations to traefik
