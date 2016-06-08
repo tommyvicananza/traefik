@@ -14,7 +14,7 @@ import (
 	"github.com/cenkalti/backoff"
 	"github.com/containous/traefik/safe"
 	"github.com/containous/traefik/types"
-	"github.com/gambol99/go-marathon"
+	"github.com/tommyvicananza/go-marathon"
 	"net/http"
 	"time"
 )
@@ -108,9 +108,19 @@ func (provider *Marathon) Provide(configurationChan chan<- types.ConfigMessage, 
 	return nil
 }
 
+func (provider *Marathon) getURLBackend(task marathon.Task, applications []marathon.Application) string {
+	_, err := getApplication(task, applications)
+	if err != nil {
+		log.Errorf("Unable to get marathon application from task %s", task.AppID)
+		return ""
+	}
+	return task.IPAddress[0].IpAddress
+}
+
 func (provider *Marathon) loadMarathonConfig() *types.Configuration {
 	var MarathonFuncMap = template.FuncMap{
 		"getBackend":         provider.getBackend,
+		"getURLBackend":			provider.getURLBackend,
 		"getPort":            provider.getPort,
 		"getWeight":          provider.getWeight,
 		"getDomain":          provider.getDomain,
@@ -163,11 +173,11 @@ func (provider *Marathon) loadMarathonConfig() *types.Configuration {
 }
 
 func taskFilter(task marathon.Task, applications *marathon.Applications, exposedByDefaultFlag bool) bool {
-	if len(task.Ports) == 0 {
+	application, err := getApplication(task, applications.Apps)
+	if (len(task.Ports) == 0 && len(application.IpAddress.Discovery.Ports) == 0){
 		log.Debug("Filtering marathon task without port %s", task.AppID)
 		return false
 	}
-	application, err := getApplication(task, applications.Apps)
 	if err != nil {
 		log.Errorf("Unable to get marathon application from task %s", task.AppID)
 		return false
@@ -269,7 +279,11 @@ func (provider *Marathon) getPort(task marathon.Task, applications []marathon.Ap
 		log.Errorf("Unable to get marathon application from task %s", task.AppID)
 		return ""
 	}
-
+	if application.IpAddress != nil {
+		if len(application.IpAddress.Discovery.Ports) > 0  {
+			return strconv.Itoa(application.IpAddress.Discovery.Ports[0].Number)
+		}
+	}
 	if portIndexLabel, err := provider.getLabel(application, "traefik.portIndex"); err == nil {
 		if index, err := strconv.Atoi(portIndexLabel); err == nil {
 			return strconv.Itoa(task.Ports[index])
